@@ -13,7 +13,7 @@ class Alarm: Codable {
     var fireDate: Date
     var name: String
     var enabled: Bool
-    var uuid: String = ""
+    var uuid: String
     var fireTimeAsString: String {
         get {
             let format = DateFormatter()
@@ -22,11 +22,11 @@ class Alarm: Codable {
         }
     }
     
-    init(fireDate: Date, name: String, enabled: Bool) {
+    init(fireDate: Date, name: String, enabled: Bool, uuid: String) {
         self.fireDate = fireDate
         self.name = name
         self.enabled = enabled
-        
+        self.uuid = uuid
     }
 }
 

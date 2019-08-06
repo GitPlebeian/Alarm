@@ -7,6 +7,33 @@
 //
 
 import Foundation
+import UserNotifications
+
+protocol AlarmScheduler: class {
+    func scheduleUserNotifications(for alarm: Alarm)
+    func cancelUserNotification(for alarm: Alarm)
+}
+
+extension AlarmScheduler {
+    func scheduleUserNotifications(for alarm: Alarm) {
+        // Defines the content a user will see when a notification will pop up
+        let content = UNMutableNotificationContent()
+        content.title = "This is content Title"
+        content.body = "This is content body"
+        content.sound = UNNotificationSound.default
+        
+        // Defines the trigger of the Notification
+        let dateComponents = Calendar.current.dateComponents([.year,.month,.day,.hour,.minute], from: alarm.fireDate)
+        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
+        
+        let request = UNNotificationRequest(identifier: "alarm", content: content, trigger: trigger)
+        
+    }
+    
+    func cancelUserNotification(for alarm: Alarm) {
+        
+    }
+}
 
 class AlarmController {
     
@@ -17,7 +44,7 @@ class AlarmController {
     // MARK: - Properties
     
     var alarms: [Alarm] = []
-    var mockAlarms: [Alarm] = [Alarm(fireDate: Date(), name: "Ten Boi", enabled: true),Alarm(fireDate: Date(), name: "Teasdfasdfn Boi", enabled: false)]
+//    var mockAlarms: [Alarm] = [Alarm(fireDate: Date(), name: "Ten Boi", enabled: true),Alarm(fireDate: Date(), name: "Teasdfasdfn Boi", enabled: false)]
 
     init() {
 //        alarms = mockAlarms
@@ -27,7 +54,7 @@ class AlarmController {
     // MARK: - CRUD
     
     func addAlarm(fireDate: Date, name: String, enabled: Bool) {
-        let alarm = Alarm(fireDate: fireDate, name: name, enabled: enabled)
+        let alarm = Alarm(fireDate: fireDate, name: name, enabled: enabled, uuid: UUID().uuidString)
         alarms.append(alarm)
         saveToPersistentStore()
     }
@@ -51,6 +78,10 @@ class AlarmController {
         alarm.enabled = !alarm.enabled
         saveToPersistentStore()
     }
+    
+    // MARK: - Custom Functions
+
+    
     
     // MARK: - Persistence
     
