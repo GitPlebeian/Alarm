@@ -23,19 +23,29 @@ extension AlarmScheduler {
         content.sound = UNNotificationSound.default
         
         // Defines the trigger of the Notification
-        let dateComponents = Calendar.current.dateComponents([.year,.month,.day,.hour,.minute], from: alarm.fireDate)
+        let dateComponents = Calendar.current.dateComponents([.hour,.minute], from: alarm.fireDate)
+        
         let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
         
-        let request = UNNotificationRequest(identifier: "alarm", content: content, trigger: trigger)
+        // Assembles the request for notification
+        let request = UNNotificationRequest(identifier: alarm.uuid, content: content, trigger: trigger)
+        
+        // Adds the request to the notificationcenter
+        UNUserNotificationCenter.current().add(request) { (error) in
+            if let error = error {print("Error adding notification: " + error.localizedDescription)} else {
+                print("scheduling thing for \(alarm.name)")
+            }
+        }
         
     }
     
     func cancelUserNotification(for alarm: Alarm) {
-        
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [alarm.uuid])
+        print("canceling notification for \(alarm.name)")
     }
 }
 
-class AlarmController {
+class AlarmController: AlarmScheduler {
     
     // MARK: - Singletons
     
@@ -50,7 +60,6 @@ class AlarmController {
 //        alarms = mockAlarms
     }
 
-    
     // MARK: - CRUD
     
     func addAlarm(fireDate: Date, name: String, enabled: Bool) {
@@ -65,17 +74,21 @@ class AlarmController {
         oldAlarm.name = name
         oldAlarm.fireDate = fireDate
         oldAlarm.enabled = enabled
+        cancelUserNotification(for: oldAlarm)
+        scheduleUserNotifications(for: oldAlarm)
         saveToPersistentStore()
     }
     
     func delete(alarm: Alarm) {
         guard let alarmIndex = alarms.firstIndex(of: alarm) else {return}
         alarms.remove(at: alarmIndex)
+        cancelUserNotification(for: alarm)
         saveToPersistentStore()
     }
     
     func toggleEnabled(for alarm: Alarm) {
         alarm.enabled = !alarm.enabled
+        alarm.enabled ? scheduleUserNotifications(for: alarm) : cancelUserNotification(for: alarm)
         saveToPersistentStore()
     }
     
@@ -120,4 +133,4 @@ class AlarmController {
             print("There was an error decoding!! \(decodingError.localizedDescription)")
         }
     }
-}
+} // End of class

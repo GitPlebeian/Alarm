@@ -17,7 +17,7 @@ class Alarm: Codable {
     var fireTimeAsString: String {
         get {
             let format = DateFormatter()
-            format.dateFormat = "h:mm a"
+            format.dateFormat = "HH:mm a"
             return format.string(from: fireDate)
         }
     }
